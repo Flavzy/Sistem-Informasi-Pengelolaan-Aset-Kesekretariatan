@@ -146,6 +146,7 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
             <option value="anggota">Modul: Anggota</option>
             <option value="inventaris">Modul: Inventaris</option>
             <option value="kegiatan">Modul: Kegiatan</option>
+            <option value="panitia">Modul: Panitia</option>
             <option value="absensi">Modul: Presensi</option>
             <option value="profiles">Modul: Pengguna / Petugas</option>
           </NativeSelect>

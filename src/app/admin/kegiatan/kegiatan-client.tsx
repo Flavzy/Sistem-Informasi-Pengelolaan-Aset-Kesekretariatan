@@ -44,6 +44,8 @@ import {
 
 interface KegiatanClientProps {
   initialKegiatan: KegiatanRow[];
+  panitiaCounts: Record<string, number>;
+  absensiCounts: Record<string, number>;
 }
 
 const statusBadgeStyles: Record<KegiatanStatus, string> = {
@@ -52,7 +54,11 @@ const statusBadgeStyles: Record<KegiatanStatus, string> = {
   selesai: "border-border text-muted-foreground bg-muted/60",
 };
 
-export function KegiatanClient({ initialKegiatan }: KegiatanClientProps) {
+export function KegiatanClient({
+  initialKegiatan,
+  panitiaCounts,
+  absensiCounts,
+}: KegiatanClientProps) {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
 
@@ -178,6 +184,7 @@ export function KegiatanClient({ initialKegiatan }: KegiatanClientProps) {
             <TableRow>
               <TableHead>Kegiatan & Lokasi</TableHead>
               <TableHead>Jadwal</TableHead>
+              <TableHead>Panitia</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Ubah Status Cepat</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
@@ -186,12 +193,15 @@ export function KegiatanClient({ initialKegiatan }: KegiatanClientProps) {
           <TableBody>
             {filteredKegiatan.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                   Tidak ada agenda kegiatan yang ditemukan.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredKegiatan.map((k) => (
+              filteredKegiatan.map((k) => {
+                const panitiaTotal = panitiaCounts[k.id] ?? 0;
+                const hadirTotal = absensiCounts[k.id] ?? 0;
+                return (
                 <TableRow key={k.id}>
                   <TableCell>
                     <div className="font-semibold">{k.nama_kegiatan}</div>
@@ -215,6 +225,18 @@ export function KegiatanClient({ initialKegiatan }: KegiatanClientProps) {
                         {k.waktu_mulai.slice(0, 5)} {k.waktu_selesai ? `- ${k.waktu_selesai.slice(0, 5)}` : "WIB"}
                       </span>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {panitiaTotal > 0 ? (
+                      <div className="text-xs">
+                        <span className="font-semibold text-foreground">{panitiaTotal} Panitia</span>
+                        <span className="block text-muted-foreground">{hadirTotal} hadir</span>
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="border-amber-500/40 text-amber-700 bg-amber-50 dark:bg-amber-950/30 text-[11px]">
+                        Belum diimpor
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={statusBadgeStyles[k.status]}>
@@ -266,9 +288,9 @@ export function KegiatanClient({ initialKegiatan }: KegiatanClientProps) {
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Link href={`/admin/kegiatan/${k.id}`}>
-                        <Button variant="outline" size="xs" className="gap-1 text-xs" title="Lihat detail & presensi">
+                        <Button variant="outline" size="xs" className="gap-1 text-xs" title="Kelola panitia & presensi">
                           <Eye className="size-3.5" />
-                          <span className="hidden sm:inline">Presensi</span>
+                          <span className="hidden sm:inline">Panitia & Presensi</span>
                         </Button>
                       </Link>
                       <Button
@@ -297,7 +319,8 @@ export function KegiatanClient({ initialKegiatan }: KegiatanClientProps) {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
         </Table>

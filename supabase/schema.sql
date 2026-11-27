@@ -116,14 +116,41 @@ comment on column public.kegiatan.status is
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Tabel 5: absensi
--- Rekaman kehadiran anggota per kegiatan.
--- Constraint UNIQUE(kegiatan_id, anggota_id) mencegah duplikat scan.
+-- Tabel 5: kegiatan_panitia
+-- Daftar panitia per kegiatan beserta jabatan & divisi kepanitiaan.
+-- Diimpor dari Excel (npm, nama_lengkap, jabatan, divisi) dan dipakai saat absensi.
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.kegiatan_panitia (
+  id            uuid        primary key default gen_random_uuid(),
+  kegiatan_id   uuid        not null references public.kegiatan(id) on delete cascade,
+  anggota_id    uuid        references public.anggota(id) on delete set null,
+  npm           text        not null,
+  nama_lengkap  text        not null,
+  jabatan       text        not null,
+  divisi        text        not null,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now(),
+  unique (kegiatan_id, npm)
+);
+
+comment on table public.kegiatan_panitia is
+  'Daftar panitia per kegiatan (diimpor dari Excel) sebagai sumber validasi & peran absensi.';
+comment on column public.kegiatan_panitia.jabatan is
+  'Jabatan kepanitiaan pada kegiatan (misal: Ketua Pelaksana, CO Acara, Anggota).';
+comment on column public.kegiatan_panitia.divisi is
+  'Divisi kepanitiaan pada kegiatan (misal: Inti, Acara, Keamanan, PDD).';
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Tabel 6: absensi
+-- Rekaman kehadiran panitia per kegiatan.
+-- Constraint UNIQUE mencegah duplikat scan per kegiatan & panitia/anggota.
 -- ─────────────────────────────────────────────────────────────────────────────
 create table if not exists public.absensi (
   id            uuid        primary key default gen_random_uuid(),
   kegiatan_id   uuid        not null references public.kegiatan(id) on delete cascade,
-  anggota_id    uuid        not null references public.anggota(id) on delete cascade,
+  panitia_id    uuid        references public.kegiatan_panitia(id) on delete cascade,
+  anggota_id    uuid        references public.anggota(id) on delete cascade,
   waktu_absen   timestamptz not null default now(),
   metode        text        not null default 'scan'
                             check (metode in ('scan', 'manual')),
@@ -131,8 +158,19 @@ create table if not exists public.absensi (
   unique (kegiatan_id, anggota_id)
 );
 
+-- Migrasi aman jika tabel absensi sudah dibuat sebelumnya tanpa kolom panitia_id
+alter table public.absensi
+  add column if not exists panitia_id uuid references public.kegiatan_panitia(id) on delete cascade;
+
+alter table public.absensi
+  alter column anggota_id drop not null;
+
+create unique index if not exists idx_absensi_kegiatan_panitia_unique
+  on public.absensi(kegiatan_id, panitia_id)
+  where panitia_id is not null;
+
 comment on table public.absensi is
-  'Rekaman absensi anggota per kegiatan. Constraint UNIQUE mencegah scan ganda.';
+  'Rekaman absensi panitia per kegiatan. Constraint UNIQUE mencegah scan ganda.';
 comment on column public.absensi.metode is
   'Metode pencatatan: "scan" via kamera barcode, "manual" via input NPM manual.';
 comment on column public.absensi.dicatat_oleh is
@@ -140,7 +178,7 @@ comment on column public.absensi.dicatat_oleh is
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Tabel 6: activity_logs
+-- Tabel 7: activity_logs
 -- Audit trail seluruh aksi penting dalam sistem.
 -- ─────────────────────────────────────────────────────────────────────────────
 create table if not exists public.activity_logs (
@@ -160,7 +198,7 @@ comment on table public.activity_logs is
 comment on column public.activity_logs.action is
   'Jenis aksi: CREATE | UPDATE | DELETE | SCAN_ABSEN | TOGGLE_PETUGAS.';
 comment on column public.activity_logs.entity_type is
-  'Modul/entitas yang dimodifikasi: anggota | inventaris | kegiatan | absensi | profiles.';
+  'Modul/entitas yang dimodifikasi: anggota | inventaris | kegiatan | panitia | absensi | profiles.';
 comment on column public.activity_logs.details is
   'Metadata JSON perubahan, misal { before: {...}, after: {...} }.';
 
@@ -189,6 +227,10 @@ create or replace trigger trg_anggota_updated_at
 
 create or replace trigger trg_inventaris_updated_at
   before update on public.inventaris
+  for each row execute function public.handle_updated_at();
+
+create or replace trigger trg_kegiatan_panitia_updated_at
+  before update on public.kegiatan_panitia
   for each row execute function public.handle_updated_at();
 
 
@@ -251,12 +293,13 @@ comment on function public.is_active_user() is
 -- =============================================================================
 
 -- Aktifkan RLS
-alter table public.profiles      enable row level security;
-alter table public.anggota       enable row level security;
-alter table public.inventaris    enable row level security;
-alter table public.kegiatan      enable row level security;
-alter table public.absensi       enable row level security;
-alter table public.activity_logs enable row level security;
+alter table public.profiles         enable row level security;
+alter table public.anggota          enable row level security;
+alter table public.inventaris       enable row level security;
+alter table public.kegiatan         enable row level security;
+alter table public.kegiatan_panitia enable row level security;
+alter table public.absensi          enable row level security;
+alter table public.activity_logs    enable row level security;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -368,6 +411,27 @@ create policy "kegiatan: petugas select"
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- RLS: kegiatan_panitia
+-- Admin: akses penuh (SELECT, INSERT, UPDATE, DELETE)
+-- Petugas aktif: SELECT saja (untuk validasi scan barcode panitia)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+drop policy if exists "kegiatan_panitia: admin full access" on public.kegiatan_panitia;
+drop policy if exists "kegiatan_panitia: petugas select"    on public.kegiatan_panitia;
+
+create policy "kegiatan_panitia: admin full access"
+  on public.kegiatan_panitia for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create policy "kegiatan_panitia: petugas select"
+  on public.kegiatan_panitia for select
+  to authenticated
+  using (public.is_active_user());
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- RLS: absensi
 -- Admin: akses penuh (SELECT, INSERT, UPDATE, DELETE)
 -- Petugas aktif: SELECT dan INSERT (tidak bisa UPDATE/DELETE)
@@ -432,7 +496,10 @@ create index if not exists idx_anggota_npm       on public.anggota(npm);
 create index if not exists idx_anggota_status    on public.anggota(status);
 create index if not exists idx_kegiatan_status   on public.kegiatan(status);
 create index if not exists idx_kegiatan_tanggal  on public.kegiatan(tanggal);
+create index if not exists idx_kegiatan_panitia_kegiatan on public.kegiatan_panitia(kegiatan_id);
+create index if not exists idx_kegiatan_panitia_npm      on public.kegiatan_panitia(npm);
 create index if not exists idx_absensi_kegiatan  on public.absensi(kegiatan_id);
+create index if not exists idx_absensi_panitia   on public.absensi(panitia_id);
 create index if not exists idx_absensi_anggota   on public.absensi(anggota_id);
 create index if not exists idx_logs_actor        on public.activity_logs(actor_id);
 create index if not exists idx_logs_entity_type  on public.activity_logs(entity_type);

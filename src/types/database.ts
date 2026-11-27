@@ -32,6 +32,7 @@ export type EntityType =
   | "anggota"
   | "inventaris"
   | "kegiatan"
+  | "panitia"
   | "absensi"
   | "profiles";
 
@@ -85,10 +86,23 @@ export type KegiatanRow = {
   created_at: string;
 };
 
+export type KegiatanPanitiaRow = {
+  id: string;
+  kegiatan_id: string;
+  anggota_id: string | null;
+  npm: string;
+  nama_lengkap: string;
+  jabatan: string;
+  divisi: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type AbsensiRow = {
   id: string;
   kegiatan_id: string;
-  anggota_id: string;
+  panitia_id: string | null;
+  anggota_id: string | null;
   waktu_absen: string;
   metode: AbsensiMetode;
   dicatat_oleh: string | null;
@@ -215,12 +229,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      kegiatan_panitia: {
+        Row: KegiatanPanitiaRow;
+        Insert: {
+          id?: string;
+          kegiatan_id: string;
+          anggota_id?: string | null;
+          npm: string;
+          nama_lengkap: string;
+          jabatan: string;
+          divisi: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          kegiatan_id?: string;
+          anggota_id?: string | null;
+          npm?: string;
+          nama_lengkap?: string;
+          jabatan?: string;
+          divisi?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       absensi: {
         Row: AbsensiRow;
         Insert: {
           id?: string;
           kegiatan_id: string;
-          anggota_id: string;
+          panitia_id?: string | null;
+          anggota_id?: string | null;
           waktu_absen?: string;
           metode?: AbsensiMetode;
           dicatat_oleh?: string | null;
@@ -228,7 +269,8 @@ export type Database = {
         Update: {
           id?: string;
           kegiatan_id?: string;
-          anggota_id?: string;
+          panitia_id?: string | null;
+          anggota_id?: string | null;
           waktu_absen?: string;
           metode?: AbsensiMetode;
           dicatat_oleh?: string | null;

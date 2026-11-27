@@ -31,6 +31,7 @@ const entityLabels: Record<EntityType, string> = {
   anggota: "Anggota",
   inventaris: "Inventaris",
   kegiatan: "Kegiatan",
+  panitia: "Panitia",
   absensi: "Presensi",
   profiles: "Pengguna",
 };

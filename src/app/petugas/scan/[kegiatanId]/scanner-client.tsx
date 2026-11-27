@@ -26,6 +26,7 @@ interface RecentAttendance {
   id: string;
   nama_lengkap: string;
   npm: string;
+  jabatan: string;
   divisi: string;
   waktu: string;
   metode: "scan" | "manual";
@@ -33,11 +34,13 @@ interface RecentAttendance {
 
 interface ScannerClientProps {
   kegiatan: KegiatanRow;
+  panitiaCount: number;
   initialAttendance: RecentAttendance[];
 }
 
 export function ScannerClient({
   kegiatan,
+  panitiaCount,
   initialAttendance,
 }: ScannerClientProps) {
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -90,21 +93,22 @@ export function ScannerClient({
     try {
       const res = await recordAbsensiAction(kegiatan.id, npm, metode);
 
-      if (res.success && res.anggota) {
+      if (res.success && res.panitia) {
         playBeep(true);
         setFeedback({
           type: "success",
           title: "Presensi Berhasil!",
-          message: `${res.anggota.nama_lengkap} (${res.anggota.npm}) - ${res.anggota.divisi}`,
+          message: `${res.panitia.nama_lengkap} (${res.panitia.npm}) - ${res.panitia.jabatan} • ${res.panitia.divisi}`,
         });
 
         // Prepend to recent list
         setRecentList((prev) => [
           {
-            id: res.anggota!.id + Date.now(),
-            nama_lengkap: res.anggota!.nama_lengkap,
-            npm: res.anggota!.npm,
-            divisi: res.anggota!.divisi,
+            id: res.panitia!.id + Date.now(),
+            nama_lengkap: res.panitia!.nama_lengkap,
+            npm: res.panitia!.npm,
+            jabatan: res.panitia!.jabatan,
+            divisi: res.panitia!.divisi,
             waktu: new Date().toLocaleTimeString("id-ID", {
               hour: "2-digit",
               minute: "2-digit",
@@ -315,6 +319,19 @@ export function ScannerClient({
         </div>
       </div>
 
+      {/* Empty Panitia Warning */}
+      {panitiaCount === 0 && (
+        <div className="p-3.5 rounded-xl border border-amber-500/40 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 flex items-start gap-3 text-xs shadow-sm">
+          <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-sm leading-tight">Daftar Panitia Belum Diimpor</p>
+            <p className="mt-0.5 opacity-90">
+              Kegiatan ini belum memiliki data panitia. Minta Admin mengimpor file Excel panitia terlebih dahulu sebelum melakukan presensi.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Feedback Banner */}
       {feedback && (
         <div
@@ -473,7 +490,7 @@ export function ScannerClient({
                 <div>
                   <p className="font-semibold text-foreground">{item.nama_lengkap}</p>
                   <p className="text-[11px] font-mono text-muted-foreground">
-                    {item.npm} • {item.divisi}
+                    {item.npm} • {item.jabatan} ({item.divisi})
                   </p>
                 </div>
                 <div className="text-right shrink-0">
