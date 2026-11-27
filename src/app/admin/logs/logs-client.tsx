@@ -101,9 +101,9 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 lg:flex-1 lg:min-h-0">
       {/* Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <History className="size-6 text-primary" />
@@ -119,7 +119,7 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
       </div>
 
       {/* Filter Bar */}
-      <div className="p-4 rounded-xl border bg-card space-y-3 shadow-sm">
+      <div className="shrink-0 p-4 rounded-xl border bg-card space-y-3 shadow-sm">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground pointer-events-none" />
@@ -206,7 +206,7 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+      <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm lg:min-h-0 lg:flex-1">
         <Table>
           <TableHeader>
             <TableRow>
@@ -302,7 +302,7 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
         </Table>
 
         {/* Pagination Bar */}
-        <div className="p-3 border-t bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="shrink-0 p-3 border-t bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
           <span>
             Halaman {currentPage} dari {totalPages} ({filteredLogs.length} entri)
           </span>
@@ -312,18 +312,20 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
               size="icon-xs"
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              aria-label="Halaman sebelumnya"
               title="Halaman sebelumnya"
             >
-              <ChevronLeft className="size-3.5" />
+              <ChevronLeft className="size-3.5" aria-hidden="true" />
             </Button>
             <Button
               variant="outline"
               size="icon-xs"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Halaman berikutnya"
               title="Halaman berikutnya"
             >
-              <ChevronRight className="size-3.5" />
+              <ChevronRight className="size-3.5" aria-hidden="true" />
             </Button>
           </div>
         </div>

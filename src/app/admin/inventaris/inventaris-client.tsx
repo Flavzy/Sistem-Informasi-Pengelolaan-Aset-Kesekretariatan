@@ -123,9 +123,9 @@ export function InventarisClient({ initialInventaris }: InventarisClientProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 lg:flex-1 lg:min-h-0">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Inventaris Sekretariat</h1>
           <p className="text-sm text-muted-foreground">
@@ -145,7 +145,7 @@ export function InventarisClient({ initialInventaris }: InventarisClientProps) {
       </div>
 
       {/* Filters & Search */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid shrink-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="relative">
           <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground pointer-events-none" />
           <Input
@@ -183,7 +183,7 @@ export function InventarisClient({ initialInventaris }: InventarisClientProps) {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border bg-card shadow-sm">
+      <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm lg:min-h-0 lg:flex-1">
         <Table>
           <TableHeader>
             <TableRow>

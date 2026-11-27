@@ -203,13 +203,13 @@ export function KegiatanDetailClient({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 lg:flex-1 lg:min-h-0">
       {/* Back button & Title */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <Link href="/admin/kegiatan">
-            <Button variant="outline" size="icon-sm">
-              <ArrowLeft className="size-4" />
+            <Button variant="outline" size="icon-sm" aria-label="Kembali ke daftar kegiatan">
+              <ArrowLeft className="size-4" aria-hidden="true" />
             </Button>
           </Link>
           <div>
@@ -257,7 +257,7 @@ export function KegiatanDetailClient({
       </div>
 
       {importSuccess && (
-        <div className="flex items-center justify-between gap-2 rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 p-3 text-sm text-emerald-700 dark:text-emerald-300">
+        <div className="flex shrink-0 items-center justify-between gap-2 rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 p-3 text-sm text-emerald-700 dark:text-emerald-300">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="size-4 shrink-0" />
             <span>{importSuccess}</span>
@@ -273,7 +273,7 @@ export function KegiatanDetailClient({
       )}
 
       {panitiaList.length === 0 && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/20 p-4 text-xs text-amber-900 dark:text-amber-200">
+        <div className="flex shrink-0 flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/20 p-4 text-xs text-amber-900 dark:text-amber-200">
           <div className="flex items-start gap-2.5">
             <AlertTriangle className="size-4 shrink-0 text-amber-600 mt-0.5" />
             <div>
@@ -296,7 +296,7 @@ export function KegiatanDetailClient({
       )}
 
       {/* Info Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid shrink-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-medium text-muted-foreground">
@@ -392,8 +392,8 @@ export function KegiatanDetailClient({
       </div>
 
       {/* Tabs + Table Card */}
-      <div className="rounded-xl border bg-card shadow-sm">
-        <div className="border-b p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm lg:min-h-0 lg:flex-1">
+        <div className="border-b p-4 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <Button
               type="button"

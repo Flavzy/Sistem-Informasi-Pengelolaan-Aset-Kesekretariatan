@@ -76,7 +76,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   return (
     <>
       {/* Mobile Header Bar */}
-      <div className="flex h-16 items-center justify-between border-b bg-card px-4 lg:hidden">
+      <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-card px-4 lg:hidden">
         <div className="flex items-center gap-2 font-bold text-foreground">
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Shield className="size-5" aria-hidden="true" />
@@ -115,7 +115,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
       <aside
         id="admin-sidebar"
         aria-label="Navigasi Admin"
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card transition-[width,transform] duration-200 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card transition-[width,transform] duration-200 lg:static lg:h-full lg:shrink-0 lg:translate-x-0 ${
           isCollapsed ? "lg:w-20" : "lg:w-64"
         } ${
           isOpen

@@ -131,9 +131,9 @@ export function KegiatanClient({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 lg:flex-1 lg:min-h-0">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Jadwal & Kegiatan HIMA</h1>
           <p className="text-sm text-muted-foreground">
@@ -153,7 +153,7 @@ export function KegiatanClient({
       </div>
 
       {/* Filter and Search */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      <div className="flex shrink-0 flex-col sm:flex-row items-center gap-3">
         <div className="relative flex-1 w-full max-w-sm">
           <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground pointer-events-none" />
           <Input
@@ -178,7 +178,7 @@ export function KegiatanClient({
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border bg-card shadow-sm">
+      <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm lg:min-h-0 lg:flex-1">
         <Table>
           <TableHeader>
             <TableRow>

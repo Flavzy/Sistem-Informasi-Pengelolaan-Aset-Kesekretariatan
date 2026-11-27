@@ -3,11 +3,18 @@
 import * as React from "react"
 import { cn } from "cn"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+interface TableProps extends React.ComponentProps<"table"> {
+  containerClassName?: string
+}
+
+function Table({ className, containerClassName, ...props }: TableProps) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn(
+        "relative w-full overflow-auto scroll-pt-10 max-h-[65dvh] lg:max-h-none lg:min-h-[240px] lg:flex-1",
+        containerClassName
+      )}
     >
       <table
         data-slot="table"
@@ -22,7 +29,10 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      className={cn(
+        "sticky top-0 z-10 bg-card [&_tr]:border-b-0 [&_tr]:hover:bg-transparent [&_th]:bg-card [&_th]:shadow-[inset_0_-1px_0_hsl(var(--border))]",
+        className
+      )}
       {...props}
     />
   )
